@@ -12,6 +12,7 @@ const arrayPapel = require('../scrapping/arrayPapelScrapping');
 //PROBLEMA PRINCIPAL: queria apertar só uma vez no botao e fzr automaticamente o post de tds as ações separadamente um por um... mas n tenho ideia de como fzr
 
 // só pra ficar mais claro... só estou querendo fzr isso p gerar uma lista de ações ou não permitir que ações fora dessa lista possam ser adicionados no app/site pra eu n procurar coisa q n existe no site
+
 let papel;
 
 const attributePapelValue = (result) => {
@@ -28,13 +29,9 @@ const attributePapelValue = (result) => {
         await connection('papel')
         .then(arrayPapel)
         .then(attributePapelValue)
-        .then(
-            connection('papel').insert({
-                    papel
-                })
+        await connection('papel').insert(
+            { papel}
         )
-        .then(()=>console.log("OIOIOI"))
-
         return res.json({
             papel
         })
@@ -71,4 +68,12 @@ const attributePapelValue = (result) => {
     })
     
 },
+
+
+async delete(req,res){
+        const { papel} = req.params;
+        await connection('papel').where('papel',papel).delete();
+        return res.status(200).send("Papel deletado");
+    }
 */
+
