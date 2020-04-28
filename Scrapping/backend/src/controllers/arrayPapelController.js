@@ -13,11 +13,11 @@ const arrayPapel = require('../scrapping/arrayPapelScrapping');
 
 // só pra ficar mais claro... só estou querendo fzr isso p gerar uma lista de ações ou não permitir que ações fora dessa lista possam ser adicionados no app/site pra eu n procurar coisa q n existe no site
 
-let papel;
+let papelarray;
 
 const attributePapelValue = (result) => {
-    console.log(result[8])
-    return papel=result[8]
+    console.log(result)
+    return papelarray=result
 }
 
 
@@ -29,13 +29,13 @@ const attributePapelValue = (result) => {
         await connection('papel')
         .then(arrayPapel)
         .then(attributePapelValue)
+        const papel = papelarray[200]
         await connection('papel').insert(
-            { papel}
+            { papel }
         )
         return res.json({
             papel
         })
-        
     },
     
     async index(req,res){
@@ -51,29 +51,4 @@ const attributePapelValue = (result) => {
     
  }
 
-
-/*
- create(req,res){
-        
-    arrayPapel()
-    .then(attributePapelValue)
-    .then(
-        connection('papel').insert({
-            papel
-        })
-    )
-
-    return res.json({
-        papel
-    })
-    
-},
-
-
-async delete(req,res){
-        const { papel} = req.params;
-        await connection('papel').where('papel',papel).delete();
-        return res.status(200).send("Papel deletado");
-    }
-*/
 
