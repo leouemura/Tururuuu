@@ -25,14 +25,17 @@ const attributePapelValue = (result) => {
  module.exports = {
     
     async create(req,res){
-        
         await connection('papel')
         .then(arrayPapel)
         .then(attributePapelValue)
-        const papel = papelarray[200]
-        await connection('papel').insert(
-            { papel }
-        )
+
+        let papel
+//papelarray.length
+        for (let n = 0; n < papelarray.length; n++) {
+            papel = papelarray[n]
+            await connection('papel').insert({ papel })
+        }
+        
         return res.json({
             papel
         })
@@ -45,7 +48,8 @@ const attributePapelValue = (result) => {
 
     async delete(req,res){
         const { papel} = req.params;
-        await connection('papel').where('papel',papel).delete();
+//.where('papel',papel)
+        await connection('papel').delete();
         return res.status(200).send("Papel deletado");
     }
     
