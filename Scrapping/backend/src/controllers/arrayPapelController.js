@@ -1,36 +1,32 @@
 const connection = require('../database/connection');
 const crypto = require('crypto');
-const arrayPapel = require('../scrapping/arrayPapelScrapping');
+const arrayPapel = require('../scrapping/FundArrayPapelScrapping');
 
-//ideia q n funciona: pegar o valor da ação e colocar um por um no banco de dados 
-//(post é o método assincrono create que da um insert da variavel papel)
-
-//PROBLEMA1 : COM DOIS ASYNC AWAIT: A primeira execução n roda pq papel === NULL... e eu n permito isso no parametro do sqlite (olhar na src/database/migration/202004..._create_papel.js)
-// apos cancelar a requisição no insomnia e dar send dnv, o bagulho funciona e da o insert... mas n rola deixar assim 
-//PROBLEMA 2: COM UM ASYNC AWAIT no primeiro connection('papel'): roda mais bonito mas parece n efetuar o insert. experimenta da um get q vc vai ver...
-
-//PROBLEMA PRINCIPAL: queria apertar só uma vez no botao e fzr automaticamente o post de tds as ações separadamente um por um... mas n tenho ideia de como fzr
-
-// só pra ficar mais claro... só estou querendo fzr isso p gerar uma lista de ações ou não permitir que ações fora dessa lista possam ser adicionados no app/site pra eu n procurar coisa q n existe no site
+// CREATE apaga td, busca do site fundamentus e depois da insert de todos os elementos separados do array como papel no database
+// UPDATE seleciona todos os obj papel e ve qual é vazio (inexistente no database)
+// INDEX seleciona todos os obj em json do database e aloca na variavel lista_papel
+// DELETE apaga todos ou determinado papel http://localhost:3000/papel/AÇÃOINDESEJADA
 
 let papelarray;
 
 const attributePapelValue = (result) => {
-    console.log(result)
+//    console.log(result)
     return papelarray=result
 }
 
 
 
  module.exports = {
-    
+
     async create(req,res){
+        await connection('papel').delete();
+
         await connection('papel')
         .then(arrayPapel)
         .then(attributePapelValue)
 
         let papel
-//papelarray.length
+
         for (let n = 0; n < papelarray.length; n++) {
             papel = papelarray[n]
             await connection('papel').insert({ papel })
@@ -40,18 +36,47 @@ const attributePapelValue = (result) => {
             papel
         })
     },
+
+
+    async update(req,res){
+
+        await connection('papel')
+        .then(arrayPapel)
+        .then(attributePapelValue)
+
+        let papel
+        let dbpapel
+        for (let n = 0; n < papelarray.length; n++) {
+            papel = papelarray[n]
+            dbpapel = await connection('papel').select('*').where('papel',papel)
+            if(dbpapel.length===0){
+                console.log("nova ação!!!",papel)
+                await connection('papel').insert({ papel })
+            }
+            
+        }
+        
+        return res.json({
+            papel
+        })
+    },
     
+
     async index(req,res){
         const lista_papel = await connection('papel').select('*');
         return res.json(lista_papel)
     },
 
+    
     async delete(req,res){
         const { papel} = req.params;
 //.where('papel',papel)
         await connection('papel').delete();
         return res.status(200).send("Papel deletado");
-    }
+    },
+
+
+    
     
  }
 
